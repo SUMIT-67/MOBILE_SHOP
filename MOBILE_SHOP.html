@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#1D4ED8"><title>Galla Mobile Shop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: left navigation rail on wide screens, scrolling tab strip on phones, one working area beside it. */
+:root{
+  --bg:#F1F5FA; --surface:#FFFFFF; --surface2:#E6EDF6; --ink:#121B2B; --muted:#5A6778; --line:#D3DBE6;
+  --accent:#1D4ED8; --accent-ink:#FFFFFF; --good:#1B7F4B; --warn:#9A5B00; --bad:#B3261E;
+  --good-bg:#DDF3E6; --warn-bg:#FFEFCF; --bad-bg:#FBE4E1; --scrim:rgba(10,15,25,.5);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1420; --surface:#141D2C; --surface2:#1C2739; --ink:#E6ECF5; --muted:#9AA8BA; --line:#2A384D;
+  --accent:#6EA0FF; --accent-ink:#08183A; --good:#4CC783; --warn:#E9A83B; --bad:#F0776E;
+  --good-bg:#123322; --warn-bg:#33270F; --bad-bg:#3A1815; --scrim:rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1420; --surface:#141D2C; --surface2:#1C2739; --ink:#E6ECF5; --muted:#9AA8BA; --line:#2A384D;
+  --accent:#6EA0FF; --accent-ink:#08183A; --good:#4CC783; --warn:#E9A83B; --bad:#F0776E;
+  --good-bg:#123322; --warn-bg:#33270F; --bad-bg:#3A1815; --scrim:rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--f-body);margin:0}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:26px;line-height:1.15}
+h2{font-size:16px}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num,td.n,.stat b,.big{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.02em}
+
+.shell{display:grid;grid-template-columns:minmax(0,1fr);min-height:100%}
+.side{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px 0}
+.brand{display:flex;align-items:baseline;gap:10px;padding-bottom:8px}
+.brand b{font:700 21px var(--f-display);letter-spacing:-.02em}
+.brand span{color:var(--muted);font-size:12px}
+nav{display:flex;gap:2px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}
+nav button{flex:none;display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:8px;padding:8px 12px;color:var(--muted);font-weight:500;white-space:nowrap}
+nav button:hover{background:var(--surface2);color:var(--ink)}
+nav button[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+.badge{font:600 11px var(--f-body);background:var(--warn-bg);color:var(--warn);border-radius:99px;padding:0 7px;min-width:20px;text-align:center;line-height:18px}
+nav button[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accent)}
+.main{padding:20px 16px 48px;min-width:0}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+@media(min-width:900px){
+  .shell{grid-template-columns:236px minmax(0,1fr)}
+  .side{top:0;height:100dvh;overflow-y:auto;border-bottom:0;border-right:1px solid var(--line);padding:22px 12px}
+  .brand{padding:0 8px 18px;flex-direction:column;gap:0}
+  nav{flex-direction:column;overflow:visible;padding:0}
+  nav button{justify-content:space-between;padding:9px 12px}
+  .main{padding:32px 32px 64px}
+}
+
+.ph{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.ph .sub{color:var(--muted);margin-top:4px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row.end{justify-content:flex-end}
+.grow{flex:1 1 200px;min-width:0}
+
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:500;line-height:1.2}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:none}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.danger.armed{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel>header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.split{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+@media(min-width:960px){.split{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stat{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.stat span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.stat b{font:700 24px var(--f-display);letter-spacing:-.01em}
+.stat small{color:var(--muted)}
+.neg{color:var(--bad)} .pos{color:var(--good)}
+
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;white-space:nowrap}
+td small,.muted{color:var(--muted)}
+td small{display:block}
+.acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+
+.pill{display:inline-block;font-size:12px;font-weight:600;border-radius:99px;padding:1px 9px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.mute{background:var(--surface2);color:var(--muted)}
+
+.note{border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.note.warn{background:var(--warn-bg);border-color:transparent;color:var(--warn)}
+.list{display:flex;flex-direction:column}
+.li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0}
+.li>div{min-width:0}
+.li small{display:block;color:var(--muted)}
+.empty{color:var(--muted);padding:14px 0}
+
+svg{width:100%;height:auto;display:block}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg .ax{fill:var(--muted);font:11px var(--f-mono)}
+svg .bar{fill:var(--accent);opacity:.5}
+svg .bar.hl{opacity:1}
+svg .val{fill:var(--ink);font:600 11px var(--f-mono)}
+
+.picklist{display:flex;flex-direction:column;max-height:360px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
+.pick{display:flex;justify-content:space-between;gap:12px;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 12px;width:100%}
+.pick:last-child{border-bottom:0}
+.pick:hover{background:var(--surface2)}
+.pick small{display:block;color:var(--muted)}
+.line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.line .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;grid-column:1/-1}
+.line .ctl input{width:96px}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:28px;height:28px;border:1px solid var(--line);background:var(--surface);border-radius:6px;line-height:1}
+.tot{display:flex;flex-direction:column;gap:4px;padding-top:6px}
+.tot div{display:flex;justify-content:space-between}
+.tot .g{font:700 18px var(--f-display);padding-top:6px;border-top:1px solid var(--line)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+
+.receipt{background:var(--surface);border:1px dashed var(--muted);border-radius:8px;padding:16px;font:13px/1.5 var(--f-mono);white-space:pre-wrap;overflow-x:auto}
+.hb{display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:10px;align-items:center;padding:5px 0}
+.hb i{display:block;height:8px;border-radius:4px;background:var(--accent);opacity:.7;min-width:2px}
+.hb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl{display:flex;flex-direction:column}
+.pl>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.pl .sub{padding-left:16px;color:var(--muted)}
+.pl .t{font-weight:600}
+.pl .g{font:700 18px var(--f-display);border-bottom:0;padding-top:12px}
+.job{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.jobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:var(--surface);border:0;padding:7px 14px;font-weight:500}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+.overlay{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;width:100%;max-width:460px;max-height:92dvh;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld span{font-weight:500;font-size:13px}
+.fld small{color:var(--muted)}
+.err{color:var(--bad);font-weight:500}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;z-index:30;max-width:90%}
+@media(prefers-reduced-motion:no-preference){#toast{animation:pop .18s ease-out}@keyframes pop{from{opacity:0;transform:translate(-50%,6px)}}}
+[hidden]{display:none!important}
+.side{padding-top:calc(10px + env(safe-area-inset-top,0px))}
+.main{padding-bottom:calc(48px + env(safe-area-inset-bottom,0px))}
+@media print{
+  :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--ink:#000;--muted:#333;--line:#999;color-scheme:light}
+  .side,#toast,.wrap>*:not(.rp),.rp header .row{display:none!important}
+  .shell{display:block}.main{padding:0}.rp{border:0;padding:0}.receipt{border:0}
+}
+</style>
+</head><body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><b>Galla</b><span id="shopname"></span></div>
+    <nav id="nav" aria-label="Sections"></nav>
+  </aside>
+  <main class="main"><div class="wrap" id="view"></div></main>
+</div>
+<div id="overlay" class="overlay" hidden></div>
+<div id="toast" role="status" hidden></div>
+
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sum=(a,f)=>a.reduce((t,x)=>t+f(x),0);
+const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
+const inr=n=>(n<0?'-':'')+'₹'+Math.abs(Math.round(Number(n)||0)).toLocaleString('en-IN');
+const pad=(n,l=2)=>String(n).padStart(l,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const TODAY=()=>ymd(new Date());
+const addD=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)};
+const addM=(s,n)=>{const d=parse(s),day=d.getDate();d.setMonth(d.getMonth()+n);if(d.getDate()!==day)d.setDate(0);return ymd(d)};
+const daysBetween=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
+const fmtD=s=>parse(s).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+const fmtDY=s=>parse(s).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+const monthEnd=m=>addD(addM(m+'-01',1),-1);
+const monthLabel=m=>parse(m+'-01').toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+const short=v=>v>=1e5?(v/1e5).toFixed(v%1e5?1:0)+'L':v>=1000?(v/1000).toFixed(v%1000?1:0)+'k':String(Math.round(v));
+
+/* ---------- data ---------- */
+const LS_KEY='galla.shop.v1';
+let storageOk=true;
+function load(){
+  try{const r=localStorage.getItem(LS_KEY);if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.sales))return o}}catch(e){storageOk=false}
+  return seedData();
+}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){storageOk=false}}
+
+function seedData(){
+  const t=TODAY();let s=11;
+  const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647};
+  const pick=a=>a[Math.floor(rnd()*a.length)];
+  const D={sample:true,seq:1,jc:1,shop:{name:'My Mobile Shop',phone:'',address:''},suppliers:[],products:[],phones:[],customers:[],sales:[],payments:[],expenses:[],repairs:[],meta:{lastBackup:null}};
+  const sup=(name,phone,city)=>{const o={id:uid(),name,phone,city,ledger:[]};D.suppliers.push(o);return o};
+  const led=(o,d,kind,note,amount)=>o.ledger.push({id:uid(),date:d,kind,note,amount});
+  const s1=sup('Sharma Mobile Distributors','9822011234','Pune'),s2=sup('Ganesh Accessories','9820045567','Mumbai'),s3=sup('Techzone Wholesale','9810098765','Delhi');
+  led(s1,addD(t,-38),'purchase','Phones, 15 units',148000);led(s1,addD(t,-36),'payment','Bank transfer',120000);
+  led(s2,addD(t,-22),'purchase','Chargers, cables, covers',18400);led(s2,addD(t,-20),'payment','UPI',18400);
+  led(s3,addD(t,-9),'purchase','Earbuds and power banks',21500);led(s3,addD(t,-9),'payment','UPI',10000);
+
+  const P=(name,category,qty,low,cost,price,wm)=>{const o={id:uid(),name,category,qty,low,cost,price,wm};D.products.push(o);return o};
+  const pr=[P('Fast Charger 25W','Charger',18,5,260,499,6),P('Type-C Cable 1m','Cable',40,10,45,149,3),P('Wired Earphones','Earphones',4,8,70,199,3),
+    P('Bluetooth Earbuds','Earphones',12,5,480,999,6),P('Tempered Glass','Screen guard',60,20,12,99,0),P('Silicone Back Cover','Cover',3,10,35,199,0),
+    P('Power Bank 10000mAh','Power bank',7,4,690,1199,12),P('Memory Card 64GB','Memory card',2,3,320,549,12)];
+
+  const C=(name,phone)=>{const o={id:uid(),name,phone};D.customers.push(o);return o};
+  const cs=[C('Rohan Patil','9890123456'),C('Sneha Kulkarni','9765432101'),C('Amit Deshmukh','9921334455'),C('Priya Joshi','9503216789'),
+    C('Vikram More','9860011223'),C('Anjali Shinde','9673344556'),C('Imran Shaikh','9822677788'),C('Kavita Pawar','9370099881')];
+
+  const raw=[];
+  const mk=(date,cust,items,paidFrac)=>{const total=sum(items,i=>i.price*i.qty);const paid=paidFrac>=1?total:Math.round(total*paidFrac/10)*10;raw.push({id:uid(),date,customerId:cust?cust.id:null,items,discount:0,total,paid,method:pick(['Cash','UPI','UPI','Card'])})};
+  const line=(p,q)=>({kind:'p',ref:p.id,name:p.name,qty:q,price:p.price,cost:p.cost,wm:p.wm});
+  for(let d=-29;d<=0;d++){
+    const bills=pick([0,1,1,2,2,3]);
+    for(let b=0;b<bills;b++){
+      const n=1+Math.floor(rnd()*2),items=[],used=new Set();
+      for(let k=0;k<n;k++){const p=pick(pr);if(!used.has(p.id)){used.add(p.id);items.push(line(p,1+Math.floor(rnd()*2)))}}
+      const c=rnd()<.5?pick(cs):null;
+      mk(addD(t,d),c,items,c&&rnd()<.15?.5:1);
+    }
+  }
+  const models=[['Redmi 13C 5G 6/128GB',9200,10999],['Samsung Galaxy M35 5G 8/128GB',15400,17499],['Realme Narzo 70x 4/128GB',9000,10499],['Vivo T3x 5G 6/128GB',11800,13499],['iQOO Z9 Lite 6/128GB',9700,10999],['Oppo A3x 4/64GB',7600,8999],['Redmi Note 13 Pro 8/256GB',22500,25999]];
+  const imei=()=>'35'+String(Math.floor(rnd()*1e13)).padStart(13,'0');
+  let idx=0;
+  models.forEach(m=>{for(let u=0;u<2;u++){D.phones.push({id:uid(),imei:imei(),model:m[0],cost:m[1],price:m[2],wm:12,supplier:s1.id,bought:addD(t,-40+idx),status:'in_stock'});idx++}});
+  const soldPlan=[[0,-24,0],[3,-19,2],[5,-15,4],[8,-11,5],[11,-6,1],[12,-2,6]];
+  soldPlan.forEach(([i,d,ci])=>{const ph=D.phones[i];ph.status='sold';ph.soldOn=addD(t,d);
+    mk(addD(t,d),cs[ci],[{kind:'ph',ref:ph.id,name:ph.model,qty:1,price:ph.price,cost:ph.cost,imei:ph.imei,wm:ph.wm}],ci===2?.6:1);});
+  const oldPh={id:uid(),imei:imei(),model:'Samsung Galaxy A15 4/128GB',cost:11200,price:12999,wm:12,supplier:s1.id,bought:addM(t,-13),status:'sold',soldOn:addD(addM(t,-12),18)};
+  D.phones.push(oldPh);
+  mk(oldPh.soldOn,cs[3],[{kind:'ph',ref:oldPh.id,name:oldPh.model,qty:1,price:oldPh.price,cost:oldPh.cost,imei:oldPh.imei,wm:12}],1);
+  mk(addD(addM(t,-8),-10),cs[6],[{kind:'p',ref:pr[3].id,name:pr[3].name,qty:1,price:pr[3].price,cost:pr[3].cost,wm:6}],1);
+  raw.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  raw.forEach(x=>{x.no='INV-'+pad(D.seq++,4);D.sales.push(x)});
+  const dueBy={};D.sales.forEach(x=>{if(x.customerId&&x.total>x.paid)dueBy[x.customerId]=(dueBy[x.customerId]||0)+x.total-x.paid});
+  Object.keys(dueBy).slice(0,2).forEach(id=>D.payments.push({id:uid(),customerId:id,date:addD(t,-3),amount:Math.round(dueBy[id]/2/10)*10,method:'UPI'}));
+
+  const first=t.slice(0,8)+'01',prev=addM(first,-1);
+  [prev,first].forEach(m=>{
+    [[0,'Rent','Shop rent',15000],[0,'Staff salary','Helper salary',12000],[4,'Electricity','Electricity bill',2350],[6,'Internet & recharge','Broadband',699],[11,'Transport','Stock pickup',650],[15,'Tea & misc','Tea and cleaning',420]]
+      .forEach(([o,cat,note,amt])=>{const d=addD(m,o);if(d<=t)D.expenses.push({id:uid(),date:d,category:cat,note,amount:amt})});
+  });
+  D.repairs.push(
+    {id:uid(),no:'JC-'+pad(D.jc++,3),date:addD(t,-7),customer:'Ramesh Gaikwad',phone:'9822455512',device:'Redmi Note 11',issue:'Screen cracked',estimate:1800,advance:500,status:'ready'},
+    {id:uid(),no:'JC-'+pad(D.jc++,3),date:addD(t,-3),customer:'Sunita Bhosale',phone:'9403122909',device:'Samsung A14',issue:'Not charging',estimate:700,advance:200,status:'repairing'},
+    {id:uid(),no:'JC-'+pad(D.jc++,3),date:addD(t,-1),customer:'Deepak Jadhav',phone:'9970044120',device:'Vivo Y20',issue:'Battery drains fast',estimate:900,advance:0,status:'received'},
+    {id:uid(),no:'JC-'+pad(D.jc++,3),date:addD(t,-9),customer:'Neha Kale',phone:'9881200345',device:'Realme 9i',issue:'Speaker not working',estimate:650,advance:0,status:'delivered',deliveredOn:addD(t,-2),charge:600,parts:240});
+  return D;
+}
+let S=load();
+
+/* ---------- calculations ---------- */
+const saleCost=s=>sum(s.items,i=>i.cost*i.qty);
+const custDue=id=>sum(S.sales.filter(s=>s.customerId===id),s=>s.total-s.paid)-sum(S.payments.filter(p=>p.customerId===id),p=>p.amount);
+const owed=sp=>sum(sp.ledger,e=>e.kind==='purchase'?e.amount:-e.amount);
+const lowItems=()=>S.products.filter(p=>p.qty<=p.low);
+const inR=(d,a,b)=>d>=a&&d<=b;
+const custName=id=>{const c=S.customers.find(x=>x.id===id);return c?c.name:'Walk-in'};
+function stats(a,b){
+  const ss=S.sales.filter(s=>inR(s.date,a,b));
+  const revenue=sum(ss,s=>s.total),cogs=sum(ss,saleCost);
+  const reps=S.repairs.filter(r=>r.status==='delivered'&&r.deliveredOn&&inR(r.deliveredOn,a,b));
+  const repairIncome=sum(reps,r=>r.charge),repairCost=sum(reps,r=>r.parts);
+  const ex=S.expenses.filter(e=>inR(e.date,a,b)),expenses=sum(ex,e=>e.amount);
+  const gross=revenue-cogs;
+  return {ss,count:ss.length,revenue,cogs,gross,repairIncome,repairCost,ex,expenses,net:gross+repairIncome-repairCost-expenses};
+}
+function warrRows(){
+  const t=TODAY(),rows=[];
+  S.sales.forEach(s=>s.items.forEach(i=>{if(i.wm>0){const end=addM(s.date,i.wm),left=daysBetween(t,end);rows.push({sale:s,item:i,end,left,state:left<0?'expired':left<=30?'soon':'active'})}}));
+  const o={soon:0,active:1,expired:2};
+  return rows.sort((a,b)=>o[a.state]-o[b.state]||(a.state==='expired'?b.left-a.left:a.left-b.left));
+}
+function byCategory(list){const m={};list.forEach(e=>m[e.category]=(m[e.category]||0)+e.amount);return Object.entries(m).sort((a,b)=>b[1]-a[1])}
+function addLedger(supId,kind,note,amount){const sp=S.suppliers.find(x=>x.id===supId);if(sp&&amount>0)sp.ledger.push({id:uid(),date:TODAY(),kind,note,amount})}
+
+/* ---------- ui state ---------- */
+const ui={view:'dash',q:'',cart:[],bill:{cust:'',paid:'',disc:'',method:'Cash'},pickQ:'',lastSale:null,stockLow:false,phFilter:'stock',openCust:null,repMode:'daily',plMode:'month',plMonth:TODAY().slice(0,7),plDay:TODAY(),exMonth:TODAY().slice(0,7),wf:'all'};
+let armed=null;
+const NAV=[['dash','Dashboard'],['bill','Sales &amp; Billing'],['stock','Stock'],['phones','Phones (IMEI)'],['cust','Customers'],['supp','Suppliers'],['exp','Expenses'],['repair','Repairs'],['pl','Profit &amp; Loss'],['rep','Reports'],['warr','Warranty'],['bak','Backup']];
+
+/* ---------- small ui pieces ---------- */
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2400)}
+function copyText(txt,done){
+  const fb=()=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();toast(ok?'Copied':'Could not copy. Select the text and copy it by hand.');if(ok&&done)done()};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(()=>{toast('Copied');if(done)done()}).catch(fb);else fb();
+}
+function fieldHtml(f){
+  const id='f_'+f.k,v=f.val==null?'':f.val;let inp;
+  if(f.type==='select')inp=`<select id="${id}" name="${f.k}">${f.opts.map(o=>{const a=Array.isArray(o)?o:[o,o];return `<option value="${esc(a[0])}"${String(a[0])===String(v)?' selected':''}>${esc(a[1])}</option>`}).join('')}</select>`;
+  else if(f.type==='textarea')inp=`<textarea id="${id}" name="${f.k}" rows="3">${esc(v)}</textarea>`;
+  else inp=`<input id="${id}" name="${f.k}" type="${f.type||'text'}" value="${esc(v)}"${f.type==='number'?' step="any" min="0"':''}${f.mode?` inputmode="${f.mode}"`:''}${f.ph?` placeholder="${esc(f.ph)}"`:''}${f.max?` maxlength="${f.max}"`:''}>`;
+  return `<label class="fld" for="${id}"><span>${f.label}</span>${inp}${f.hint?`<small>${f.hint}</small>`:''}</label>`;
+}
+function openForm(title,fields,onSave,submit){
+  const ov=$('#overlay');
+  ov.innerHTML=`<form class="sheet" id="sheetForm" novalidate><h2>${title}</h2>${fields.map(fieldHtml).join('')}<p class="err" id="formErr" hidden></p><div class="row end"><button type="button" class="btn ghost" data-act="closeform">Cancel</button><button class="btn primary">${submit||'Save'}</button></div></form>`;
+  ov.hidden=false;
+  const form=$('#sheetForm');
+  form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),v={};fields.forEach(f=>v[f.k]=(fd.get(f.k)||'').toString().trim());
+    const err=onSave(v);if(err){const p=$('#formErr');p.textContent=err;p.hidden=false}else{closeForm()}};
+  const first=form.querySelector('input,select,textarea');if(first)first.focus();
+}
+function closeForm(){const ov=$('#overlay');ov.hidden=true;ov.innerHTML=''}
+const supOpts=()=>[['','No supplier']].concat(S.suppliers.map(x=>[x.id,x.name]));
+
+/* ---------- charts ---------- */
+function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v))),f=v/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
+function barChart(data,label){
+  const W=640,H=210,L=44,R=8,T=18,B=26,max=niceMax(Math.max(...data.map(d=>d.v),1));
+  const bw=(W-L-R)/data.length,ys=v=>T+(H-T-B)*(1-v/max);let g='';
+  [0,.5,1].forEach(f=>{const v=max*f,y=ys(v);g+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y}" y2="${y}"/><text class="ax" x="${L-6}" y="${y+4}" text-anchor="end">${short(v)}</text>`});
+  data.forEach((d,i)=>{const w=bw*.64,x=L+i*bw+bw*.18,y=ys(d.v);
+    g+=`<rect class="bar${d.hl?' hl':''}" x="${x}" y="${y}" width="${w}" height="${Math.max(0,H-B-y)}" rx="3"><title>${esc(d.title||d.label)}: ${inr(d.v)}</title></rect><text class="ax" x="${x+w/2}" y="${H-8}" text-anchor="middle">${esc(d.label)}</text>`;
+    if(data.length<=8&&d.v>0)g+=`<text class="val" x="${x+w/2}" y="${y-5}" text-anchor="middle">${short(d.v)}</text>`});
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}">${g}</svg>`;
+}
+function lastDays(n){const t=TODAY(),out=[];for(let i=n-1;i>=0;i--){const d=addD(t,-i),st=stats(d,d);out.push({label:String(parse(d).getDate()),title:fmtD(d),v:st.revenue,hl:i===0,d,st})}return out}
+
+/* ---------- views ---------- */
+const VIEWS={},LISTS={};
+
+VIEWS.dash=()=>{
+  const t=TODAY(),st=stats(t,t),low=lowItems();
+  const dues=S.customers.map(c=>({c,d:custDue(c.id)})).filter(x=>x.d>0).sort((a,b)=>b.d-a.d);
+  const totalDue=sum(dues,x=>x.d);
+  const soon=warrRows().filter(r=>r.state==='soon').slice(0,4);
+  const recent=S.sales.slice(-5).reverse();
+  const lb=S.meta.lastBackup,stale=!lb||daysBetween(lb,t)>7;
+  const d7=lastDays(7);
+  const dateStr=parse(t).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+  return `<header class="ph"><div><h1>${esc(S.shop.name)}</h1><p class="sub">${dateStr}</p></div><button class="btn primary" data-act="go" data-v="bill">New bill</button></header>
+  ${S.sample?`<div class="note"><span>You are looking at sample data so you can try every screen.</span><button class="btn sm" data-act="clearall">Clear sample data and start fresh</button></div>`:''}
+  ${!storageOk?`<div class="note warn"><span>This browser is not saving changes. Copy a backup before you close the page.</span><button class="btn sm" data-act="go" data-v="bak">Open Backup</button></div>`:''}
+  <div class="stats">
+    <div class="stat"><span>Sales today</span><b>${inr(st.revenue)}</b><small>${st.count} bill${st.count===1?'':'s'}</small></div>
+    <div class="stat"><span>Profit today</span><b class="${st.net<0?'neg':''}">${inr(st.net)}</b><small>after ${inr(st.expenses)} expenses</small></div>
+    <div class="stat"><span>Expenses today</span><b>${inr(st.expenses)}</b><small>${st.ex.length} entr${st.ex.length===1?'y':'ies'}</small></div>
+    <div class="stat"><span>Pending payments</span><b>${inr(totalDue)}</b><small>${dues.length} customer${dues.length===1?'':'s'} owe you</small></div>
+  </div>
+  <div class="split">
+    <section class="panel"><header><h2>Sales, last 7 days</h2><span class="muted">${inr(sum(d7,x=>x.v))} total</span></header>${barChart(d7,'Sales for the last 7 days')}</section>
+    <section class="panel"><header><h2>Low stock</h2>${low.length?`<span class="pill warn">${low.length} to reorder</span>`:`<span class="pill good">All stocked</span>`}</header>
+      <div class="list">${low.length?low.slice(0,6).map(p=>`<div class="li"><div><b>${esc(p.name)}</b><small>Alert at ${p.low}</small></div><span class="pill ${p.qty===0?'bad':'warn'}">${p.qty===0?'Out of stock':p.qty+' left'}</span></div>`).join(''):'<p class="empty">Nothing is running low.</p>'}</div>
+      ${low.length?`<button class="btn sm" data-act="lowstock">See all low stock</button>`:''}</section>
+  </div>
+  <div class="split">
+    <section class="panel"><header><h2>Pending payments</h2></header><div class="list">${dues.length?dues.slice(0,5).map(x=>`<div class="li"><div><b>${esc(x.c.name)}</b><small class="mono">${esc(x.c.phone)}</small></div><b class="num">${inr(x.d)}</b></div>`).join(''):'<p class="empty">No one owes you money.</p>'}</div></section>
+    <section class="panel"><header><h2>Recent bills</h2></header><div class="list">${recent.length?recent.map(s=>`<div class="li"><div><b>${s.no}</b><small>${esc(custName(s.customerId))}, ${fmtD(s.date)}</small></div><b class="num">${inr(s.total)}</b></div>`).join(''):'<p class="empty">No bills yet.</p>'}</div></section>
+  </div>
+  ${soon.length?`<section class="panel"><header><h2>Warranty ending within 30 days</h2><button class="btn sm" data-act="go" data-v="warr">Open warranty</button></header><div class="list">${soon.map(r=>`<div class="li"><div><b>${esc(r.item.name)}</b><small>${esc(custName(r.sale.customerId))}${r.item.imei?', IMEI '+esc(r.item.imei):''}</small></div><span class="pill warn">Ends ${fmtD(r.end)}</span></div>`).join('')}</div></section>`:''}
+  ${stale?`<div class="note warn"><span>${lb?'Your last backup was '+daysBetween(lb,t)+' days ago.':'You have not made a backup yet.'}</span><button class="btn sm" data-act="go" data-v="bak">Back up now</button></div>`:''}`;
+};
+
+/* --- Billing --- */
+function lPick(){
+  const q=ui.pickQ.toLowerCase(),inCart=new Set(ui.cart.map(i=>i.kind+i.ref));
+  const ps=S.products.filter(p=>p.qty>0&&(!q||p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q)));
+  const ph=S.phones.filter(p=>p.status==='in_stock'&&!inCart.has('ph'+p.id)&&(!q||p.model.toLowerCase().includes(q)||p.imei.includes(q)));
+  const rows=ph.slice(0,8).map(p=>`<button class="pick" data-act="addcart" data-kind="ph" data-id="${p.id}"><span><b>${esc(p.model)}</b><small class="mono">IMEI ${esc(p.imei)}</small></span><b class="num">${inr(p.price)}</b></button>`)
+    .concat(ps.slice(0,12).map(p=>`<button class="pick" data-act="addcart" data-kind="p" data-id="${p.id}"><span><b>${esc(p.name)}</b><small>${p.qty} in stock</small></span><b class="num">${inr(p.price)}</b></button>`));
+  return rows.length?rows.join(''):'<p class="empty" style="padding:12px">Nothing matches. Check the spelling or add the item in Stock or Phones.</p>';
+}
+function totalsHtml(){
+  const sub=sum(ui.cart,i=>i.price*i.qty),disc=Math.min(num(ui.bill.disc),sub),total=sub-disc;
+  const paid=ui.bill.paid===''?total:num(ui.bill.paid),due=total-paid;
+  return `<div class="tot"><div><span>Subtotal</span><span class="num">${inr(sub)}</span></div>${disc?`<div><span>Discount</span><span class="num">-${inr(disc)}</span></div>`:''}
+  <div class="g"><span>Total</span><span class="num">${inr(total)}</span></div>
+  <div><span>Paid now</span><span class="num">${inr(paid)}</span></div>
+  <div><span>${due<0?'Overpaid':'Pending'}</span><b class="num ${due>0?'neg':''}">${inr(Math.abs(due))}</b></div></div>`;
+}
+function cartHtml(){
+  const c=ui.cart;
+  if(!c.length)return '<p class="empty">The bill is empty. Pick an item on the left.</p>';
+  return c.map((i,n)=>`<div class="line"><div><b>${esc(i.name)}</b>${i.imei?`<small class="mono muted" style="display:block">IMEI ${esc(i.imei)}</small>`:''}</div><b class="num">${inr(i.price*i.qty)}</b>
+    <div class="ctl">${i.kind==='p'?`<div class="stepper"><button type="button" data-act="qty" data-i="${n}" data-d="-1" aria-label="Less">-</button><span class="num">${i.qty}</span><button type="button" data-act="qty" data-i="${n}" data-d="1" aria-label="More">+</button></div>`:'<span class="muted">1 phone</span>'}
+    <label class="row muted" style="flex-wrap:nowrap">Price <input type="number" min="0" step="any" data-price="${n}" value="${i.price}" aria-label="Price for ${esc(i.name)}"></label>
+    <button type="button" class="btn sm ghost" data-act="rm" data-i="${n}">Remove</button></div></div>`).join('');
+}
+function receiptText(s){
+  const sh=S.shop,L=[];
+  L.push(sh.name);if(sh.phone)L.push('Ph: '+sh.phone);if(sh.address)L.push(sh.address);
+  L.push('Bill '+s.no+'   '+fmtDY(s.date),'Customer: '+custName(s.customerId),'------------------------------');
+  s.items.forEach(i=>{L.push(i.name+(i.qty>1?' x'+i.qty:'')+'   '+inr(i.price*i.qty));if(i.imei)L.push('  IMEI '+i.imei);if(i.wm>0)L.push('  Warranty till '+fmtDY(addM(s.date,i.wm)))});
+  L.push('------------------------------');
+  if(s.discount)L.push('Discount   -'+inr(s.discount));
+  L.push('Total      '+inr(s.total),'Paid       '+inr(s.paid)+' ('+s.method+')');
+  if(s.total>s.paid)L.push('Pending    '+inr(s.total-s.paid));
+  L.push('','Thank you. Please keep this bill for warranty.');
+  return L.join('\n');
+}
+function receiptPanel(s){
+  const c=S.customers.find(x=>x.id===s.customerId),txt=receiptText(s);
+  const wa=c&&c.phone?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/91${encodeURIComponent(c.phone)}?text=${encodeURIComponent(txt)}">Send on WhatsApp</a>`:'';
+  return `<section class="panel rp"><header><h2>Bill ${s.no}</h2><div class="row"><button class="btn" data-act="copyreceipt" data-id="${s.id}">Copy bill text</button>${wa}<button class="btn" data-act="printbill">Print</button><button class="btn danger" data-act="cancelbill" data-id="${s.id}">Cancel bill</button><button class="btn primary" data-act="newbill">Start next bill</button></div></header><div class="receipt">${esc(txt)}</div></section>`;
+}
+VIEWS.bill=()=>{
+  const sale=ui.lastSale&&S.sales.find(s=>s.id===ui.lastSale);
+  const recent=S.sales.slice(-8).reverse();
+  return `<header class="ph"><div><h1>Sales &amp; Billing</h1><p class="sub">Stock reduces when you save a bill. Unpaid amounts go to the customer's pending balance.</p></div></header>
+  ${sale?receiptPanel(sale):''}
+  <div class="split">
+    <section class="panel"><h2>Add items</h2><input id="pickQ" type="search" placeholder="Search item, model or IMEI" value="${esc(ui.pickQ)}" aria-label="Search items"><div class="picklist" id="pickList">${lPick()}</div></section>
+    <section class="panel"><h2>Current bill</h2>
+      <div id="cart">${cartHtml()}</div>
+      <div class="fields">
+        <label class="fld"><span>Customer</span><select data-billsel="cust" id="billCust"><option value="">Walk-in customer</option>${S.customers.map(c=>`<option value="${c.id}"${ui.bill.cust===c.id?' selected':''}>${esc(c.name)} (${esc(c.phone)})</option>`).join('')}</select></label>
+        <label class="fld"><span>Payment method</span><select data-billsel="method" id="billMethod">${['Cash','UPI','Card','Bank transfer'].map(m=>`<option${ui.bill.method===m?' selected':''}>${m}</option>`).join('')}</select></label>
+        <label class="fld"><span>Discount (&#8377;)</span><input id="billDisc" type="number" min="0" step="any" data-bill="disc" value="${esc(ui.bill.disc)}"></label>
+        <label class="fld"><span>Paid now (&#8377;)</span><input id="billPaid" type="number" min="0" step="any" data-bill="paid" value="${esc(ui.bill.paid)}" placeholder="Full amount"></label>
+      </div>
+      <div id="totals">${totalsHtml()}</div><p class="err" id="billErr" hidden></p>
+      <div class="row"><button class="btn primary" data-act="savebill">Save bill</button><button class="btn" data-act="quickcust">New customer</button><button class="btn ghost" data-act="clearcart">Clear</button></div>
+    </section>
+  </div>
+  <section class="panel"><h2>Recent bills</h2><div class="tw"><table><thead><tr><th>Bill</th><th>Date</th><th>Customer</th><th class="n">Total</th><th class="n">Pending</th><th></th></tr></thead><tbody>
+  ${recent.map(s=>`<tr><td><b>${s.no}</b></td><td>${fmtD(s.date)}</td><td>${esc(custName(s.customerId))}</td><td class="n">${inr(s.total)}</td><td class="n">${s.total>s.paid?`<span class="pill warn">${inr(s.total-s.paid)}</span>`:'<span class="muted">Paid</span>'}</td><td class="n"><button class="btn sm" data-act="viewsale" data-id="${s.id}">View</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">No bills yet.</td></tr>'}</tbody></table></div></section>`;
+};
+
+/* --- Stock --- */
+LISTS.stock=()=>{
+  const q=ui.q.toLowerCase();
+  let ps=S.products.filter(p=>!q||p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q));
+  if(ui.stockLow)ps=ps.filter(p=>p.qty<=p.low);
+  ps.sort((a,b)=>(a.qty<=a.low?0:1)-(b.qty<=b.low?0:1)||a.name.localeCompare(b.name));
+  return `<div class="tw"><table><thead><tr><th>Item</th><th class="n">In stock</th><th class="n">Alert at</th><th class="n">Cost</th><th class="n">Price</th><th class="n">Margin</th><th>Status</th><th></th></tr></thead><tbody>
+  ${ps.map(p=>{const st=p.qty===0?['bad','Out of stock']:p.qty<=p.low?['warn','Low stock']:['good','OK'],m=p.price?Math.round((p.price-p.cost)/p.price*100):0;
+    return `<tr><td><b>${esc(p.name)}</b><small>${esc(p.category)}${p.wm?', '+p.wm+' mo warranty':''}</small></td><td class="n"><b>${p.qty}</b></td><td class="n">${p.low}</td><td class="n">${inr(p.cost)}</td><td class="n">${inr(p.price)}</td><td class="n">${m}%</td><td><span class="pill ${st[0]}">${st[1]}</span></td>
+    <td><div class="acts"><button class="btn sm primary" data-act="restock" data-id="${p.id}">Add stock</button><button class="btn sm" data-act="editprod" data-id="${p.id}">Edit</button><button class="btn sm danger" data-act="del" data-kind="prod" data-id="${p.id}">Delete</button></div></td></tr>`}).join('')||'<tr><td colspan="8" class="empty">No items match.</td></tr>'}</tbody></table></div>`;
+};
+VIEWS.stock=()=>{
+  const low=lowItems().length;
+  return `<header class="ph"><div><h1>Stock</h1><p class="sub">${S.products.length} items, worth ${inr(sum(S.products,p=>p.qty*p.cost))} at cost. Chargers, earphones, covers and other non-IMEI items.</p></div><button class="btn primary" data-act="addprod">Add product</button></header>
+  <div class="row"><input class="grow" type="search" data-q placeholder="Search products" value="${esc(ui.q)}" aria-label="Search products"><button class="btn ${ui.stockLow?'on':''}" data-act="lowstock">Low stock only (${low})</button></div>
+  <section class="panel" id="list">${LISTS.stock()}</section>`;
+};
+
+/* --- Phones --- */
+LISTS.phones=()=>{
+  const q=ui.q.toLowerCase();
+  let ph=S.phones.filter(p=>(ui.phFilter==='all'||(ui.phFilter==='stock')===(p.status==='in_stock'))&&(!q||p.model.toLowerCase().includes(q)||p.imei.includes(q)));
+  ph.sort((a,b)=>b.bought<a.bought?-1:1);
+  const spn=id=>{const s=S.suppliers.find(x=>x.id===id);return s?s.name:'None'};
+  const buyer=p=>{const s=S.sales.find(x=>x.items.some(i=>i.kind==='ph'&&i.ref===p.id));return s?custName(s.customerId):''};
+  return `<div class="tw"><table><thead><tr><th>IMEI</th><th>Model</th><th class="n">Bought at</th><th class="n">Selling price</th><th class="n">Profit</th><th>Status</th><th></th></tr></thead><tbody>
+  ${ph.map(p=>`<tr><td class="mono">${esc(p.imei)}</td><td><b>${esc(p.model)}</b><small>${esc(spn(p.supplier))}, bought ${fmtD(p.bought)}</small></td><td class="n">${inr(p.cost)}</td><td class="n">${inr(p.price)}</td><td class="n pos">${inr(p.price-p.cost)}</td>
+  <td>${p.status==='in_stock'?'<span class="pill good">In stock</span>':`<span class="pill mute">Sold ${fmtD(p.soldOn)}</span><small>${esc(buyer(p))}</small>`}</td>
+  <td><div class="acts">${p.status==='in_stock'?`<button class="btn sm" data-act="editphone" data-id="${p.id}">Edit</button><button class="btn sm danger" data-act="del" data-kind="phone" data-id="${p.id}">Delete</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="7" class="empty">No phones match.</td></tr>'}</tbody></table></div>`;
+};
+VIEWS.phones=()=>{
+  const n=S.phones.filter(p=>p.status==='in_stock');
+  return `<header class="ph"><div><h1>Phones (IMEI)</h1><p class="sub">${n.length} in stock, worth ${inr(sum(n,p=>p.cost))} at cost. Every handset is tracked by its IMEI.</p></div><button class="btn primary" data-act="addphone">Add phone</button></header>
+  <div class="row"><input class="grow" type="search" data-q placeholder="Search by IMEI or model" value="${esc(ui.q)}" aria-label="Search phones">
+  <div class="seg">${[['stock','In stock'],['sold','Sold'],['all','All']].map(x=>`<button data-act="phfilter" data-v="${x[0]}" aria-pressed="${ui.phFilter===x[0]}">${x[1]}</button>`).join('')}</div></div>
+  <section class="panel" id="list">${LISTS.phones()}</section>`;
+};
+
+/* --- Customers --- */
+LISTS.cust=()=>{
+  const q=ui.q.toLowerCase();
+  const rows=S.customers.filter(c=>!q||c.name.toLowerCase().includes(q)||c.phone.includes(q)).map(c=>({c,d:custDue(c.id),bills:S.sales.filter(s=>s.customerId===c.id)}))
+    .sort((a,b)=>b.d-a.d||a.c.name.localeCompare(b.c.name));
+  return `<div class="tw"><table><thead><tr><th>Customer</th><th class="n">Bills</th><th class="n">Total bought</th><th class="n">Pending</th><th></th></tr></thead><tbody>
+  ${rows.map(({c,d,bills})=>{
+    let out=`<tr><td><b>${esc(c.name)}</b><small class="mono">${esc(c.phone)}</small></td><td class="n">${bills.length}</td><td class="n">${inr(sum(bills,s=>s.total))}</td><td class="n">${d>0?`<span class="pill warn">${inr(d)}</span>`:'<span class="muted">Clear</span>'}</td>
+    <td><div class="acts">${d>0?`<button class="btn sm primary" data-act="recv" data-id="${c.id}">Receive payment</button>`:''}<button class="btn sm" data-act="histcust" data-id="${c.id}">${ui.openCust===c.id?'Hide history':'History'}</button><button class="btn sm" data-act="editcust" data-id="${c.id}">Edit</button><button class="btn sm danger" data-act="del" data-kind="cust" data-id="${c.id}">Delete</button></div></td></tr>`;
+    if(ui.openCust===c.id){
+      const ev=bills.map(s=>({d:s.date,t:`Bill ${s.no}: ${s.items.map(i=>i.name).join(', ')}`,a:s.total,due:s.total-s.paid})).concat(S.payments.filter(p=>p.customerId===c.id).map(p=>({d:p.date,t:'Payment received ('+p.method+')',a:-p.amount}))).sort((a,b)=>a.d<b.d?1:-1);
+      out+=`<tr><td colspan="5" style="background:var(--surface2)">${ev.length?ev.map(e=>`<div class="li"><div>${fmtD(e.d)}: ${esc(e.t)}</div><span class="num">${e.a<0?'- '+inr(-e.a):inr(e.a)}${e.due>0?` <span class="pill warn">${inr(e.due)} unpaid</span>`:''}</span></div>`).join(''):'<p class="empty">No purchases yet.</p>'}</td></tr>`;
+    }
+    return out}).join('')||'<tr><td colspan="5" class="empty">No customers match.</td></tr>'}</tbody></table></div>`;
+};
+VIEWS.cust=()=>{
+  const dues=sum(S.customers,c=>Math.max(0,custDue(c.id)));
+  return `<header class="ph"><div><h1>Customers</h1><p class="sub">${S.customers.length} saved. Customers owe you ${inr(dues)} in total.</p></div><button class="btn primary" data-act="addcust">Add customer</button></header>
+  <input type="search" data-q placeholder="Search by name or phone" value="${esc(ui.q)}" aria-label="Search customers">
+  <section class="panel" id="list">${LISTS.cust()}</section>`;
+};
+
+/* --- Suppliers --- */
+VIEWS.supp=()=>{
+  const total=sum(S.suppliers,owed);
+  return `<header class="ph"><div><h1>Suppliers</h1><p class="sub">You owe suppliers ${inr(total)} in total.</p></div><button class="btn primary" data-act="addsupp">Add supplier</button></header>
+  <div class="jobs">${S.suppliers.map(sp=>{const pur=sum(sp.ledger.filter(e=>e.kind==='purchase'),e=>e.amount),o=owed(sp);
+    return `<section class="panel"><header><div><h2>${esc(sp.name)}</h2><small class="muted">${esc(sp.city||'')}${sp.phone?' &middot; <span class="mono">'+esc(sp.phone)+'</span>':''}</small></div>${o>0?`<span class="pill warn">Owe ${inr(o)}</span>`:'<span class="pill good">Settled</span>'}</header>
+    <div class="row muted"><span>Purchased ${inr(pur)}</span><span>Paid ${inr(pur-o)}</span></div>
+    <div class="list">${sp.ledger.slice(-4).reverse().map(e=>`<div class="li"><div>${esc(e.note)}<small>${fmtD(e.date)}</small></div><span class="num ${e.kind==='payment'?'pos':''}">${e.kind==='payment'?'Paid ':''}${inr(e.amount)}</span></div>`).join('')||'<p class="empty">No purchases recorded.</p>'}</div>
+    <div class="row"><button class="btn sm primary" data-act="suppbuy" data-id="${sp.id}">Record purchase</button>${o>0?`<button class="btn sm" data-act="supppay" data-id="${sp.id}">Pay supplier</button>`:''}<button class="btn sm" data-act="editsupp" data-id="${sp.id}">Edit</button><button class="btn sm danger" data-act="del" data-kind="supp" data-id="${sp.id}">Delete</button></div></section>`}).join('')||'<p class="empty">No suppliers yet.</p>'}</div>`;
+};
+
+/* --- Expenses --- */
+VIEWS.exp=()=>{
+  const m=ui.exMonth,ex=S.expenses.filter(e=>e.date.slice(0,7)===m).sort((a,b)=>a.date<b.date?1:-1),tot=sum(ex,e=>e.amount),cats=byCategory(ex);
+  return `<header class="ph"><div><h1>Expenses</h1><p class="sub">Rent, electricity, transport, staff salary and other running costs.</p></div><button class="btn primary" data-act="addexp">Add expense</button></header>
+  <div class="row"><label class="row">Month <input type="month" data-f="exMonth" value="${m}" style="width:auto"></label><b class="num">${inr(tot)} this month</b></div>
+  <div class="split"><section class="panel"><h2>By category</h2>${cats.length?cats.map(([c,a])=>`<div class="hb"><span>${esc(c)}</span><i style="width:${Math.max(2,a/cats[0][1]*100)}%"></i><b class="num">${inr(a)}</b></div>`).join(''):'<p class="empty">No expenses this month.</p>'}</section>
+  <section class="panel"><h2>Entries</h2><div class="tw"><table><thead><tr><th>Date</th><th>Details</th><th class="n">Amount</th><th></th></tr></thead><tbody>${ex.map(e=>`<tr><td>${fmtD(e.date)}</td><td><b>${esc(e.category)}</b><small>${esc(e.note)}</small></td><td class="n">${inr(e.amount)}</td><td class="n"><button class="btn sm danger" data-act="del" data-kind="exp" data-id="${e.id}">Delete</button></td></tr>`).join('')||'<tr><td colspan="4" class="empty">Nothing recorded.</td></tr>'}</tbody></table></div></section></div>`;
+};
+
+/* --- Repairs --- */
+VIEWS.repair=()=>{
+  const g=(st)=>S.repairs.filter(r=>st.includes(r.status)).sort((a,b)=>a.date<b.date?1:-1);
+  const card=r=>{
+    const wa=r.status==='ready'&&r.phone?`<a class="btn sm" target="_blank" rel="noopener" href="https://wa.me/91${encodeURIComponent(r.phone)}?text=${encodeURIComponent('Hello '+r.customer+', your '+r.device+' is repaired and ready for pickup. Balance to pay: '+inr(Math.max(0,r.estimate-r.advance))+'. '+S.shop.name)}">Tell customer</a>`:'';
+    const next={received:['Start repair','repairing'],repairing:['Mark ready','ready'],ready:['Deliver and bill','deliver']}[r.status];
+    return `<div class="job"><div class="row" style="justify-content:space-between"><b>${r.no}</b><span class="pill ${r.status==='ready'?'good':r.status==='delivered'?'mute':'warn'}">${{received:'Received',repairing:'In repair',ready:'Ready',delivered:'Delivered'}[r.status]}</span></div>
+    <div><b>${esc(r.device)}</b><small class="muted" style="display:block">${esc(r.issue)}</small></div>
+    <div class="muted">${esc(r.customer)}${r.phone?' &middot; <span class="mono">'+esc(r.phone)+'</span>':''}<br>In on ${fmtD(r.date)}</div>
+    ${r.status==='delivered'?`<div>Charged ${inr(r.charge)}, parts ${inr(r.parts)}, earned <b class="pos">${inr(r.charge-r.parts)}</b></div>`:`<div>Estimate ${inr(r.estimate)}${r.advance?`, advance ${inr(r.advance)}`:''}</div>`}
+    <div class="row">${next?`<button class="btn sm primary" data-act="${next[1]==='deliver'?'deliver':'reprog'}" data-id="${r.id}" data-next="${next[1]}">${next[0]}</button>`:''}${wa}<button class="btn sm danger" data-act="del" data-kind="rep" data-id="${r.id}">Delete</button></div></div>`};
+  const sec=(t,l,em)=>`<section class="panel"><header><h2>${t}</h2><span class="muted">${l.length}</span></header>${l.length?`<div class="jobs">${l.map(card).join('')}</div>`:`<p class="empty">${em}</p>`}</section>`;
+  return `<header class="ph"><div><h1>Repairs</h1><p class="sub">A job card for every phone that comes in for repair. Delivered jobs count towards profit.</p></div><button class="btn primary" data-act="addrep">New job card</button></header>
+  ${sec('In progress',g(['received','repairing']),'No phones in repair.')}${sec('Ready for pickup',g(['ready']),'Nothing waiting for pickup.')}${sec('Delivered',g(['delivered']).slice(0,6),'No delivered jobs yet.')}`;
+};
+
+/* --- Profit & Loss --- */
+VIEWS.pl=()=>{
+  const day=ui.plMode==='day',a=day?ui.plDay:ui.plMonth+'-01',b=day?ui.plDay:monthEnd(ui.plMonth),st=stats(a,b),cats=byCategory(st.ex);
+  const margin=st.revenue?Math.round(st.gross/st.revenue*100):0;
+  return `<header class="ph"><div><h1>Profit &amp; Loss</h1><p class="sub">Approximate. Profit uses the cost you recorded for each item when you sold it.</p></div></header>
+  <div class="row"><div class="seg"><button data-act="plmode" data-v="day" aria-pressed="${day}">Day</button><button data-act="plmode" data-v="month" aria-pressed="${!day}">Month</button></div>
+  ${day?`<input type="date" data-f="plDay" value="${ui.plDay}" style="width:auto" aria-label="Day">`:`<input type="month" data-f="plMonth" value="${ui.plMonth}" style="width:auto" aria-label="Month">`}
+  <b>${day?fmtDY(a):monthLabel(ui.plMonth)}</b></div>
+  <div class="stats"><div class="stat"><span>Sales</span><b>${inr(st.revenue)}</b><small>${st.count} bills</small></div><div class="stat"><span>Gross profit</span><b>${inr(st.gross)}</b><small>${margin}% margin</small></div><div class="stat"><span>Expenses</span><b>${inr(st.expenses)}</b></div><div class="stat"><span>Net profit</span><b class="${st.net<0?'neg':'pos'}">${inr(st.net)}</b></div></div>
+  <section class="panel"><div class="pl">
+    <div class="t"><span>Sales revenue</span><span class="num">${inr(st.revenue)}</span></div>
+    <div class="sub"><span>Cost of items sold</span><span class="num">- ${inr(st.cogs)}</span></div>
+    <div class="t"><span>Gross profit on sales</span><span class="num">${inr(st.gross)}</span></div>
+    <div><span>Repair income after parts</span><span class="num">${inr(st.repairIncome-st.repairCost)}</span></div>
+    <div class="t"><span>Expenses</span><span class="num">- ${inr(st.expenses)}</span></div>
+    ${cats.map(([c,v])=>`<div class="sub"><span>${esc(c)}</span><span class="num">${inr(v)}</span></div>`).join('')}
+    <div class="g"><span>Net profit</span><span class="num ${st.net<0?'neg':'pos'}">${inr(st.net)}</span></div></div></section>`;
+};
+
+/* --- Reports --- */
+VIEWS.rep=()=>{
+  const daily=ui.repMode==='daily',t=TODAY();let data,rows,from,label;
+  if(daily){data=lastDays(14);from=data[0].d;label='Last 14 days';
+    rows=data.slice().reverse().map(x=>`<tr><td>${fmtD(x.d)}</td><td class="n">${x.st.count}</td><td class="n">${inr(x.st.revenue)}</td><td class="n">${inr(x.st.gross)}</td><td class="n">${inr(x.st.expenses)}</td></tr>`).join('');}
+  else{data=[];rows='';const f0=t.slice(0,8)+'01';
+    for(let i=5;i>=0;i--){const m=addM(f0,-i),st=stats(m,monthEnd(m.slice(0,7)));data.push({label:parse(m).toLocaleDateString('en-IN',{month:'short'}),title:monthLabel(m.slice(0,7)),v:st.revenue,hl:i===0,st,m});}
+    from=data[0].m;label='Last 6 months';
+    rows=data.slice().reverse().map(x=>`<tr><td>${monthLabel(x.m.slice(0,7))}</td><td class="n">${x.st.count}</td><td class="n">${inr(x.st.revenue)}</td><td class="n">${inr(x.st.gross)}</td><td class="n">${inr(x.st.expenses)}</td></tr>`).join('');}
+  const st=stats(from,t),best={};
+  st.ss.forEach(s=>s.items.forEach(i=>{const b=best[i.name]||(best[i.name]={qty:0,rev:0,profit:0});b.qty+=i.qty;b.rev+=i.price*i.qty;b.profit+=(i.price-i.cost)*i.qty}));
+  const top=Object.entries(best).sort((a,b)=>b[1].qty-a[1].qty||b[1].rev-a[1].rev).slice(0,8),cats=byCategory(st.ex);
+  return `<header class="ph"><div><h1>Reports</h1><p class="sub">${label}: sales, best sellers and expenses.</p></div><div class="seg"><button data-act="repmode" data-v="daily" aria-pressed="${daily}">Daily</button><button data-act="repmode" data-v="monthly" aria-pressed="${!daily}">Monthly</button></div></header>
+  <section class="panel"><header><h2>Sales</h2><span class="muted">${inr(st.revenue)} across ${st.count} bills</span></header>${barChart(data,'Sales, '+label)}
+  <div class="tw"><table><thead><tr><th>${daily?'Date':'Month'}</th><th class="n">Bills</th><th class="n">Sales</th><th class="n">Gross profit</th><th class="n">Expenses</th></tr></thead><tbody>${rows}</tbody></table></div></section>
+  <div class="split"><section class="panel"><h2>Best-selling items</h2><div class="tw"><table><thead><tr><th>Item</th><th class="n">Sold</th><th class="n">Sales</th><th class="n">Profit</th></tr></thead><tbody>${top.map(([n,b])=>`<tr><td><b>${esc(n)}</b></td><td class="n">${b.qty}</td><td class="n">${inr(b.rev)}</td><td class="n pos">${inr(b.profit)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No sales in this period.</td></tr>'}</tbody></table></div></section>
+  <section class="panel"><h2>Expenses in this period</h2>${cats.length?cats.map(([c,a])=>`<div class="hb"><span>${esc(c)}</span><i style="width:${Math.max(2,a/cats[0][1]*100)}%"></i><b class="num">${inr(a)}</b></div>`).join(''):'<p class="empty">No expenses recorded.</p>'}</section></div>`;
+};
+
+/* --- Warranty --- */
+LISTS.warr=()=>{
+  const q=ui.q.toLowerCase();
+  const rows=warrRows().filter(r=>(ui.wf==='all'||r.state===ui.wf)&&(!q||r.item.name.toLowerCase().includes(q)||(r.item.imei||'').includes(q)||custName(r.sale.customerId).toLowerCase().includes(q)||r.sale.no.toLowerCase().includes(q)));
+  return `<div class="tw"><table><thead><tr><th>Item</th><th>Customer</th><th>Sold on</th><th>Warranty until</th><th>Status</th></tr></thead><tbody>
+  ${rows.map(r=>{const p={active:['good',r.left+' days left'],soon:['warn','Ends in '+r.left+' days'],expired:['mute','Ended '+(-r.left)+' days ago']}[r.state];
+    return `<tr><td><b>${esc(r.item.name)}</b>${r.item.imei?`<small class="mono">IMEI ${esc(r.item.imei)}</small>`:''}</td><td>${esc(custName(r.sale.customerId))}<small>${r.sale.no}</small></td><td>${fmtDY(r.sale.date)}</td><td>${fmtDY(r.end)}<small>${r.item.wm} months</small></td><td><span class="pill ${p[0]}">${p[1]}</span></td></tr>`}).join('')||'<tr><td colspan="5" class="empty">No warranty records match.</td></tr>'}</tbody></table></div>`;
+};
+VIEWS.warr=()=>`<header class="ph"><div><h1>Warranty</h1><p class="sub">Warranty starts on the day of the bill. Search by IMEI, customer name or bill number when someone comes back.</p></div></header>
+  <div class="row"><input class="grow" type="search" data-q placeholder="Search IMEI, customer or bill number" value="${esc(ui.q)}" aria-label="Search warranty">
+  <div class="seg">${[['all','All'],['soon','Ending soon'],['active','Active'],['expired','Expired']].map(x=>`<button data-act="wf" data-v="${x[0]}" aria-pressed="${ui.wf===x[0]}">${x[1]}</button>`).join('')}</div></div>
+  <section class="panel" id="list">${LISTS.warr()}</section>`;
+
+/* --- Backup --- */
+VIEWS.bak=()=>{
+  const lb=S.meta.lastBackup;
+  return `<header class="ph"><div><h1>Backup</h1><p class="sub">${storageOk?'Your data is saved inside this browser on this device.':'This browser is not saving data right now.'} A backup lets you restore it if the device is lost or cleared.</p></div></header>
+  <section class="panel"><h2>Back up</h2><p class="muted">${lb?'Last backup copied on '+fmtDY(lb)+'.':'No backup made yet.'} Copy the text and paste it into a note, WhatsApp chat with yourself, or an email.</p>
+    <div class="row"><button class="btn primary" data-act="dlbackup">Download backup file</button><button class="btn" data-act="copybackup">Copy backup</button></div>
+    <textarea id="bakText" rows="4" readonly aria-label="Backup text">${esc(JSON.stringify(S))}</textarea></section>
+  <section class="panel"><h2>Export to Excel</h2><p class="muted">One file with a sheet for summary, sales, stock, phones, customers, suppliers, expenses, repairs and warranty. Opens in Excel or Google Sheets.</p><div class="row"><button class="btn primary" data-act="xlsx">Download Excel workbook (.xlsx)</button></div><p class="muted">Or a single sheet as CSV:</p><div class="row"><button class="btn" data-act="csv" data-v="sales">Sales, item by item</button><button class="btn" data-act="csv" data-v="stock">Stock list</button><button class="btn" data-act="csv" data-v="phones">Phones (IMEI)</button><button class="btn" data-act="csv" data-v="exp">Expenses</button></div></section>
+  <section class="panel"><h2>Restore</h2><p class="muted">Restoring replaces everything currently in the app.</p>
+    <textarea id="restoreText" rows="4" placeholder="Paste backup text here" aria-label="Paste backup text"></textarea><p class="err" id="restoreErr" hidden></p>
+    <div class="row"><button class="btn" data-act="restorepaste">Restore from pasted text</button><label class="btn">Restore from file<input type="file" id="restoreFile" accept=".json,.txt,application/json,text/plain" hidden></label></div></section>
+  <section class="panel"><h2>Shop details</h2><p class="muted">Shown on the dashboard and on every bill.</p><div class="row"><b>${esc(S.shop.name)}</b><span class="muted">${esc(S.shop.phone)} ${esc(S.shop.address)}</span></div><div class="row"><button class="btn" data-act="shopform">Edit shop details</button></div></section>
+  <section class="panel"><h2>Start over</h2><p class="muted">Removes all products, phones, bills, customers and expenses from this browser. Copy a backup first if you want to keep anything.</p><div class="row"><button class="btn danger" data-act="clearall">Clear everything</button></div></section>`;
+};
+
+/* ---------- render ---------- */
+function renderNav(){
+  const badge={stock:lowItems().length,warr:warrRows().filter(r=>r.state==='soon').length,repair:S.repairs.filter(r=>r.status==='ready').length};
+  $('#nav').innerHTML=NAV.map(([k,l])=>`<button data-act="go" data-v="${k}"${ui.view===k?' aria-current="page"':''}><span>${l}</span>${badge[k]?`<span class="badge" aria-label="${badge[k]} need attention">${badge[k]}</span>`:''}</button>`).join('');
+  $('#shopname').textContent=S.shop.name;
+}
+function alertHtml(){
+  const low=lowItems();if(!low.length||ui.view==='stock')return '';
+  const out=low.filter(p=>p.qty===0).length;
+  return `<div class="note warn" role="alert"><span><b>${low.length} item${low.length===1?'':'s'} running low</b>${out?', '+out+' out of stock':''}: ${esc(low.slice(0,3).map(p=>p.name).join(', '))}${low.length>3?' and more':''}</span><button class="btn sm" data-act="lowstock">Reorder list</button></div>`;
+}
+function render(){renderNav();$('#view').innerHTML=alertHtml()+VIEWS[ui.view]()}
+function go(v){ui.view=v;ui.q='';render();window.scrollTo(0,0)}
+function persist(msg){save();render();if(msg)toast(msg)}
+
+/* ---------- actions ---------- */
+function productForm(p){
+  const cats=['Charger','Cable','Earphones','Cover','Screen guard','Power bank','Memory card','Speaker','Other'];
+  const isNew=!p;p=p||{name:'',category:'Charger',qty:'',low:5,cost:'',price:'',wm:0};
+  openForm(isNew?'Add product':'Edit product',[
+    {k:'name',label:'Name',val:p.name},{k:'category',label:'Category',type:'select',opts:cats,val:p.category},
+    {k:'qty',label:'Quantity in stock',type:'number',val:p.qty},{k:'low',label:'Alert when stock is at or below',type:'number',val:p.low},
+    {k:'cost',label:'Cost price (₹)',type:'number',val:p.cost},{k:'price',label:'Selling price (₹)',type:'number',val:p.price},
+    {k:'wm',label:'Warranty (months)',type:'number',val:p.wm,hint:'Use 0 for no warranty'}],v=>{
+    if(!v.name)return 'Enter the product name.';if(v.price==='')return 'Enter the selling price.';if(v.qty==='')return 'Enter the quantity in stock.';
+    const o={name:v.name,category:v.category,qty:Math.round(num(v.qty)),low:Math.round(num(v.low)),cost:num(v.cost),price:num(v.price),wm:Math.round(num(v.wm))};
+    if(isNew)S.products.push(Object.assign({id:uid()},o));else Object.assign(p,o);persist(isNew?'Product added':'Product updated');});
+}
+function phoneForm(p){
+  const isNew=!p;p=p||{imei:'',model:'',cost:'',price:'',wm:12,supplier:''};
+  const f=[];
+  if(isNew)f.push({k:'imei',label:'IMEI number',val:'',mode:'numeric',max:15,hint:'15 digits. Dial *#06# on the phone to see it.'});
+  f.push({k:'model',label:'Model',val:p.model},{k:'cost',label:'Purchase price (₹)',type:'number',val:p.cost},{k:'price',label:'Selling price (₹)',type:'number',val:p.price},{k:'wm',label:'Warranty (months)',type:'number',val:p.wm});
+  if(isNew)f.push({k:'supplier',label:'Bought from',type:'select',opts:supOpts(),val:''},{k:'paid',label:'Paid to supplier now (₹)',type:'number',val:'',hint:'Leave empty if you paid nothing yet'});
+  openForm(isNew?'Add phone':'Edit phone',f,v=>{
+    if(isNew){if(!/^\d{15}$/.test(v.imei))return 'IMEI must be exactly 15 digits.';if(S.phones.some(x=>x.imei===v.imei))return 'This IMEI is already in your list.'}
+    if(!v.model)return 'Enter the model.';if(v.price==='')return 'Enter the selling price.';
+    if(isNew){const cost=num(v.cost);S.phones.push({id:uid(),imei:v.imei,model:v.model,cost,price:num(v.price),wm:Math.round(num(v.wm)),supplier:v.supplier,bought:TODAY(),status:'in_stock'});
+      if(v.supplier){addLedger(v.supplier,'purchase',v.model,cost);addLedger(v.supplier,'payment','Paid at purchase',Math.min(num(v.paid),cost))}}
+    else{p.model=v.model;p.cost=num(v.cost);p.price=num(v.price);p.wm=Math.round(num(v.wm))}
+    persist(isNew?'Phone added':'Phone updated');});
+}
+function custForm(after){
+  openForm('Add customer',[{k:'name',label:'Name'},{k:'phone',label:'Mobile number',mode:'numeric',max:10}],v=>{
+    if(!v.name)return 'Enter the customer name.';if(v.phone&&!/^\d{10}$/.test(v.phone))return 'Mobile number must be 10 digits.';
+    const c={id:uid(),name:v.name,phone:v.phone};S.customers.push(c);if(after)after(c);persist('Customer added');});
+}
+function saveBill(){
+  const err=m=>{const p=$('#billErr');p.textContent=m;p.hidden=false};
+  if(!ui.cart.length)return err('Add at least one item to the bill.');
+  const sub=sum(ui.cart,i=>i.price*i.qty),disc=Math.min(num(ui.bill.disc),sub),total=sub-disc,paid=ui.bill.paid===''?total:num(ui.bill.paid);
+  if(paid>total)return err('Paid amount is more than the bill total.');
+  if(total-paid>0&&!ui.bill.cust)return err('Choose a customer to keep the pending amount against.');
+  for(const i of ui.cart){if(i.kind==='p'){const p=S.products.find(x=>x.id===i.ref);if(!p||p.qty<i.qty)return err((p?p.name:'An item')+' has only '+(p?p.qty:0)+' in stock.')}}
+  const sale={id:uid(),no:'INV-'+pad(S.seq++,4),date:TODAY(),customerId:ui.bill.cust||null,items:ui.cart.map(i=>({kind:i.kind,ref:i.ref,name:i.name,qty:i.qty,price:i.price,cost:i.cost,imei:i.imei,wm:i.wm})),discount:disc,total,paid,method:ui.bill.method};
+  ui.cart.forEach(i=>{if(i.kind==='p'){S.products.find(x=>x.id===i.ref).qty-=i.qty}else{const ph=S.phones.find(x=>x.id===i.ref);ph.status='sold';ph.soldOn=sale.date}});
+  S.sales.push(sale);ui.cart=[];ui.bill={cust:'',paid:'',disc:'',method:'Cash'};ui.lastSale=sale.id;persist('Bill '+sale.no+' saved');window.scrollTo(0,0);
+}
+function act(a,d,btn){
+  switch(a){
+  case 'go':return go(d.v);
+  case 'closeform':return closeForm();
+  case 'del':{const key=d.kind+d.id;
+    if(armed!==key){armed=key;btn.textContent='Tap again to delete';btn.classList.add('armed');setTimeout(()=>{if(armed===key){armed=null;btn.textContent='Delete';btn.classList.remove('armed')}},3000);return}
+    armed=null;const id=d.id;
+    if(d.kind==='prod')S.products=S.products.filter(x=>x.id!==id);
+    else if(d.kind==='phone')S.phones=S.phones.filter(x=>x.id!==id);
+    else if(d.kind==='exp')S.expenses=S.expenses.filter(x=>x.id!==id);
+    else if(d.kind==='rep')S.repairs=S.repairs.filter(x=>x.id!==id);
+    else if(d.kind==='cust'){if(S.sales.some(s=>s.customerId===id)||S.payments.some(p=>p.customerId===id))return toast('This customer has bills, so they cannot be deleted.');S.customers=S.customers.filter(x=>x.id!==id)}
+    else if(d.kind==='supp'){const sp=S.suppliers.find(x=>x.id===id);if(sp&&sp.ledger.length)return toast('This supplier has records, so it cannot be deleted.');S.suppliers=S.suppliers.filter(x=>x.id!==id)}
+    return persist('Deleted');}
+  case 'addprod':return productForm();
+  case 'editprod':return productForm(S.products.find(x=>x.id===d.id));
+  case 'restock':{const p=S.products.find(x=>x.id===d.id);
+    return openForm('Add stock: '+esc(p.name),[{k:'qty',label:'Quantity received',type:'number'},{k:'cost',label:'Cost per item (₹)',type:'number',val:p.cost},{k:'supplier',label:'Bought from',type:'select',opts:supOpts()},{k:'paid',label:'Paid to supplier now (₹)',type:'number',hint:'Leave empty if you paid nothing yet'}],v=>{
+      const q=Math.round(num(v.qty));if(q<=0)return 'Enter how many items you received.';const cost=num(v.cost);
+      p.qty+=q;p.cost=cost;if(v.supplier){addLedger(v.supplier,'purchase',q+' x '+p.name,q*cost);addLedger(v.supplier,'payment','Paid at purchase',Math.min(num(v.paid),q*cost))}
+      persist(q+' added to stock');},'Add to stock');}
+  case 'lowstock':ui.stockLow=true;if(ui.view!=='stock')ui.q='';ui.view='stock';return render();
+  case 'addphone':return phoneForm();
+  case 'editphone':return phoneForm(S.phones.find(x=>x.id===d.id));
+  case 'phfilter':ui.phFilter=d.v;return render();
+  case 'addcust':return custForm();
+  case 'quickcust':return custForm(c=>{ui.bill.cust=c.id});
+  case 'histcust':ui.openCust=ui.openCust===d.id?null:d.id;return render();
+  case 'recv':{const c=S.customers.find(x=>x.id===d.id),due=custDue(c.id);
+    return openForm('Payment from '+esc(c.name),[{k:'amount',label:'Amount received (₹)',type:'number',val:due,hint:'Pending: '+inr(due)},{k:'method',label:'Method',type:'select',opts:['Cash','UPI','Card','Bank transfer']}],v=>{
+      const a2=num(v.amount);if(a2<=0)return 'Enter the amount received.';if(a2>due)return 'That is more than the pending '+inr(due)+'.';
+      S.payments.push({id:uid(),customerId:c.id,date:TODAY(),amount:a2,method:v.method});persist('Payment recorded');},'Record payment');}
+  case 'addsupp':return openForm('Add supplier',[{k:'name',label:'Supplier name'},{k:'phone',label:'Phone',mode:'numeric',max:10},{k:'city',label:'City'}],v=>{if(!v.name)return 'Enter the supplier name.';S.suppliers.push({id:uid(),name:v.name,phone:v.phone,city:v.city,ledger:[]});persist('Supplier added')});
+  case 'suppbuy':{const sp=S.suppliers.find(x=>x.id===d.id);
+    return openForm('Purchase from '+esc(sp.name),[{k:'note',label:'What did you buy?'},{k:'amount',label:'Bill amount (₹)',type:'number'},{k:'paid',label:'Paid now (₹)',type:'number',hint:'Leave empty if unpaid'}],v=>{
+      const am=num(v.amount);if(!v.note)return 'Describe what you bought.';if(am<=0)return 'Enter the bill amount.';addLedger(sp.id,'purchase',v.note,am);addLedger(sp.id,'payment','Paid at purchase',Math.min(num(v.paid),am));persist('Purchase recorded');});}
+  case 'supppay':{const sp=S.suppliers.find(x=>x.id===d.id),o=owed(sp);
+    return openForm('Pay '+esc(sp.name),[{k:'amount',label:'Amount paid (₹)',type:'number',val:o,hint:'You owe '+inr(o)},{k:'note',label:'Note',val:'UPI'}],v=>{
+      const am=num(v.amount);if(am<=0)return 'Enter the amount.';if(am>o)return 'That is more than the '+inr(o)+' you owe.';addLedger(sp.id,'payment',v.note||'Payment',am);persist('Payment recorded');},'Record payment');}
+  case 'addexp':return openForm('Add expense',[{k:'date',label:'Date',type:'date',val:TODAY()},{k:'category',label:'Category',type:'select',opts:['Rent','Electricity','Staff salary','Transport','Internet & recharge','Tea & misc','Shop maintenance','Other']},{k:'amount',label:'Amount (₹)',type:'number'},{k:'note',label:'Note'}],v=>{
+    if(!v.date)return 'Choose a date.';if(num(v.amount)<=0)return 'Enter the amount.';S.expenses.push({id:uid(),date:v.date,category:v.category,note:v.note,amount:num(v.amount)});ui.exMonth=v.date.slice(0,7);persist('Expense added');});
+  case 'addrep':return openForm('New job card',[{k:'customer',label:'Customer name'},{k:'phone',label:'Mobile number',mode:'numeric',max:10},{k:'device',label:'Phone model'},{k:'issue',label:'Problem'},{k:'estimate',label:'Estimate (₹)',type:'number'},{k:'advance',label:'Advance taken (₹)',type:'number'}],v=>{
+    if(!v.customer||!v.device||!v.issue)return 'Enter the customer, phone model and problem.';
+    S.repairs.push({id:uid(),no:'JC-'+pad(S.jc++,3),date:TODAY(),customer:v.customer,phone:v.phone,device:v.device,issue:v.issue,estimate:num(v.estimate),advance:num(v.advance),status:'received'});persist('Job card created');});
+  case 'reprog':{const r=S.repairs.find(x=>x.id===d.id);r.status=d.next;return persist('Job '+r.no+' updated');}
+  case 'deliver':{const r=S.repairs.find(x=>x.id===d.id);
+    return openForm('Deliver '+r.no,[{k:'charge',label:'Total charged to customer (₹)',type:'number',val:r.estimate,hint:'Includes the advance of '+inr(r.advance)},{k:'parts',label:'Parts cost (₹)',type:'number',val:0}],v=>{
+      if(num(v.charge)<=0)return 'Enter the amount charged.';r.status='delivered';r.deliveredOn=TODAY();r.charge=num(v.charge);r.parts=num(v.parts);persist('Repair delivered');},'Mark delivered');}
+  case 'addcart':{
+    if(d.kind==='ph'){const p=S.phones.find(x=>x.id===d.id);ui.cart.push({kind:'ph',ref:p.id,name:p.model,qty:1,price:p.price,cost:p.cost,imei:p.imei,wm:p.wm})}
+    else{const p=S.products.find(x=>x.id===d.id),ex=ui.cart.find(i=>i.kind==='p'&&i.ref===p.id);
+      if(ex){if(ex.qty>=p.qty)return toast('Only '+p.qty+' in stock');ex.qty++}else ui.cart.push({kind:'p',ref:p.id,name:p.name,qty:1,price:p.price,cost:p.cost,wm:p.wm})}
+    $('#cart').innerHTML=cartHtml();$('#totals').innerHTML=totalsHtml();$('#pickList').innerHTML=lPick();return;}
+  case 'qty':{const i=ui.cart[+d.i],p=S.products.find(x=>x.id===i.ref),n=i.qty+(+d.d);if(n<1)return;if(n>p.qty)return toast('Only '+p.qty+' in stock');i.qty=n;return render();}
+  case 'rm':ui.cart.splice(+d.i,1);return render();
+  case 'clearcart':ui.cart=[];ui.bill={cust:'',paid:'',disc:'',method:'Cash'};return render();
+  case 'savebill':return saveBill();
+  case 'newbill':ui.lastSale=null;return render();
+  case 'viewsale':ui.lastSale=d.id;render();return window.scrollTo(0,0);
+  case 'copyreceipt':return copyText(receiptText(S.sales.find(x=>x.id===d.id)));
+  case 'printbill':return window.print();
+  case 'cancelbill':{const sl=S.sales.find(x=>x.id===d.id);if(!sl)return;const key='cb'+sl.id;
+    if(armed!==key){armed=key;btn.textContent='Tap again to cancel';btn.classList.add('armed');setTimeout(()=>{if(armed===key){armed=null;btn.textContent='Cancel bill';btn.classList.remove('armed')}},3000);return}
+    armed=null;
+    sl.items.forEach(i=>{if(i.kind==='p'){const p=S.products.find(x=>x.id===i.ref);if(p)p.qty+=i.qty}else{const ph=S.phones.find(x=>x.id===i.ref);if(ph){ph.status='in_stock';delete ph.soldOn}}});
+    S.sales=S.sales.filter(x=>x.id!==sl.id);ui.lastSale=null;return persist('Bill '+sl.no+' cancelled, stock restored');}
+  case 'editcust':{const c=S.customers.find(x=>x.id===d.id);
+    return openForm('Edit customer',[{k:'name',label:'Name',val:c.name},{k:'phone',label:'Mobile number',mode:'numeric',max:10,val:c.phone}],v=>{
+      if(!v.name)return 'Enter the customer name.';if(v.phone&&!/^\d{10}$/.test(v.phone))return 'Mobile number must be 10 digits.';c.name=v.name;c.phone=v.phone;persist('Customer updated')});}
+  case 'editsupp':{const sp=S.suppliers.find(x=>x.id===d.id);
+    return openForm('Edit supplier',[{k:'name',label:'Supplier name',val:sp.name},{k:'phone',label:'Phone',mode:'numeric',max:10,val:sp.phone},{k:'city',label:'City',val:sp.city}],v=>{
+      if(!v.name)return 'Enter the supplier name.';sp.name=v.name;sp.phone=v.phone;sp.city=v.city;persist('Supplier updated')});}
+  case 'dlbackup':return download('galla-backup-'+TODAY()+'.json',JSON.stringify(S),'application/json',()=>{S.meta.lastBackup=TODAY();save()});
+  case 'xlsx':return exportXlsx();
+  case 'csv':return exportCsv(d.v);
+  case 'repmode':ui.repMode=d.v;return render();
+  case 'plmode':ui.plMode=d.v;return render();
+  case 'wf':ui.wf=d.v;return render();
+  case 'copybackup':return copyText(JSON.stringify(S),()=>{S.meta.lastBackup=TODAY();save();toast('Backup copied. Paste it somewhere safe.')});
+  case 'restorepaste':return restore($('#restoreText').value);
+  case 'shopform':return openForm('Shop details',[{k:'name',label:'Shop name',val:S.shop.name},{k:'phone',label:'Phone',val:S.shop.phone},{k:'address',label:'Address',val:S.shop.address}],v=>{if(!v.name)return 'Enter the shop name.';S.shop={name:v.name,phone:v.phone,address:v.address};persist('Shop details saved')});
+  case 'clearall':return openForm('Clear everything?',[],()=>{S={sample:false,seq:1,jc:1,shop:S.shop,suppliers:[],products:[],phones:[],customers:[],sales:[],payments:[],expenses:[],repairs:[],meta:{lastBackup:S.meta.lastBackup}};ui.cart=[];ui.lastSale=null;persist('Cleared. Add your first product to begin.');go('stock')},'Yes, clear it all');
+  }
+}
+function download(name,text,type,done){
+  try{const u=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);
+    if(done)done();render();toast('Saved '+name)}
+  catch(e){toast('Download did not work here. Use Copy backup instead.')}
+}
+function csvOf(rows){return '\ufeff'+rows.map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\r\n')}
+function exportCsv(kind){
+  let rows;
+  if(kind==='sales'){rows=[['Date','Bill','Customer','Item','IMEI','Qty','Price','Cost','Bill discount','Bill total','Paid','Method']];
+    S.sales.forEach(s=>s.items.forEach(i=>rows.push([s.date,s.no,custName(s.customerId),i.name,i.imei||'',i.qty,i.price,i.cost,s.discount,s.total,s.paid,s.method])))}
+  else if(kind==='stock'){rows=[['Item','Category','In stock','Alert at','Cost','Price','Warranty months']].concat(S.products.map(p=>[p.name,p.category,p.qty,p.low,p.cost,p.price,p.wm]))}
+  else if(kind==='phones'){rows=[['IMEI','Model','Cost','Price','Warranty months','Bought','Status','Sold on']].concat(S.phones.map(p=>[p.imei,p.model,p.cost,p.price,p.wm,p.bought,p.status,p.soldOn||'']))}
+  else{rows=[['Date','Category','Note','Amount']].concat(S.expenses.map(e=>[e.date,e.category,e.note,e.amount]))}
+  download('galla-'+kind+'-'+TODAY()+'.csv',csvOf(rows),'text/csv');
+}
+const CRC_T=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=b=>{let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC_T[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0};
+function zipStore(files){
+  const enc=new TextEncoder(),parts=[],cd=[];let off=0;
+  const u16=n=>[n&255,(n>>>8)&255],u32=n=>[n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255];
+  files.forEach(([name,txt])=>{const nb=enc.encode(name),db=enc.encode(txt),crc=crc32(db);
+    const lh=Uint8Array.from([0x50,0x4b,3,4,...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(db.length),...u32(db.length),...u16(nb.length),...u16(0)]);
+    parts.push(lh,nb,db);
+    cd.push(Uint8Array.from([0x50,0x4b,1,2,...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(crc),...u32(db.length),...u32(db.length),...u16(nb.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),nb);
+    off+=lh.length+nb.length+db.length});
+  const cdLen=cd.reduce((t,x)=>t+x.length,0);
+  const end=Uint8Array.from([0x50,0x4b,5,6,...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(cdLen),...u32(off),...u16(0)]);
+  return new Blob([...parts,...cd,end],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+const colName=i=>{let r='';i++;while(i>0){const m=(i-1)%26;r=String.fromCharCode(65+m)+r;i=Math.floor((i-1)/26)}return r};
+const xe=v=>String(v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function sheetXml(rows){
+  const w=rows[0].map((_,c)=>rows.reduce((m,r)=>Math.max(m,String(r[c]==null?'':r[c]).length+2),10)).map(x=>Math.min(x,48));
+  const body=rows.map((r,ri)=>`<row r="${ri+1}">`+r.map((v,ci)=>{const ref=colName(ci)+(ri+1),st=ri===0?' s="1"':'';
+    if(typeof v==='number'&&isFinite(v))return `<c r="${ref}"${st}><v>${v}</v></c>`;
+    return v===''||v==null?'':`<c r="${ref}"${st} t="inlineStr"><is><t xml:space="preserve">${xe(v)}</t></is></c>`}).join('')+'</row>').join('');
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>'+w.map((x,i)=>`<col min="${i+1}" max="${i+1}" width="${x}" customWidth="1"/>`).join('')+'</cols><sheetData>'+body+'</sheetData></worksheet>';
+}
+function buildXlsx(sheets){
+  const H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',NS='http://schemas.openxmlformats.org/spreadsheetml/2006/main',RN='http://schemas.openxmlformats.org/officeDocument/2006/relationships',PR='http://schemas.openxmlformats.org/package/2006/relationships';
+  const n=sheets.length,f=[];
+  f.push(['[Content_Types].xml',H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')+'</Types>']);
+  f.push(['_rels/.rels',H+`<Relationships xmlns="${PR}"><Relationship Id="rId1" Type="${RN}/officeDocument" Target="xl/workbook.xml"/></Relationships>`]);
+  f.push(['xl/workbook.xml',H+`<workbook xmlns="${NS}" xmlns:r="${RN}"><sheets>`+sheets.map(([nm],i)=>`<sheet name="${xe(nm.replace(/[\\/?*\[\]:]/g,' ').slice(0,31))}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')+'</sheets></workbook>']);
+  f.push(['xl/_rels/workbook.xml.rels',H+`<Relationships xmlns="${PR}">`+sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="${RN}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')+`<Relationship Id="rId${n+1}" Type="${RN}/styles" Target="styles.xml"/></Relationships>`]);
+  f.push(['xl/styles.xml',H+`<styleSheet xmlns="${NS}"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1D4ED8"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`]);
+  sheets.forEach(([,rows],i)=>f.push([`xl/worksheets/sheet${i+1}.xml`,sheetXml(rows)]));
+  return zipStore(f);
+}
+function exportXlsx(){
+  const t=TODAY(),td=stats(t,t),mo=stats(t.slice(0,8)+'01',t),spn=id=>{const x=S.suppliers.find(y=>y.id===id);return x?x.name:''};
+  const sheets=[
+    ['Summary',[['Measure','Amount'],['Sales today',td.revenue],['Net profit today',td.net],['Sales this month',mo.revenue],['Gross profit this month',mo.gross],['Expenses this month',mo.expenses],['Net profit this month',mo.net],['Stock value at cost (items)',sum(S.products,p=>p.qty*p.cost)],['Stock value at cost (phones)',sum(S.phones.filter(p=>p.status==='in_stock'),p=>p.cost)],['Customers owe you',sum(S.customers,c=>Math.max(0,custDue(c.id)))],['You owe suppliers',sum(S.suppliers,owed)],['Exported on',t]]],
+    ['Sales',[['Date','Bill','Customer','Item','IMEI','Qty','Price','Cost','Line profit','Bill discount','Bill total','Paid','Pending','Method']].concat(S.sales.flatMap(x=>x.items.map(i=>[x.date,x.no,custName(x.customerId),i.name,i.imei||'',i.qty,i.price,i.cost,(i.price-i.cost)*i.qty,x.discount,x.total,x.paid,x.total-x.paid,x.method])))],
+    ['Stock',[['Item','Category','In stock','Alert at','Cost','Price','Warranty months','Status']].concat(S.products.map(p=>[p.name,p.category,p.qty,p.low,p.cost,p.price,p.wm,p.qty===0?'Out of stock':p.qty<=p.low?'Low stock':'OK']))],
+    ['Phones (IMEI)',[['IMEI','Model','Cost','Selling price','Warranty months','Supplier','Bought on','Status','Sold on']].concat(S.phones.map(p=>[p.imei,p.model,p.cost,p.price,p.wm,spn(p.supplier),p.bought,p.status==='in_stock'?'In stock':'Sold',p.soldOn||'']))],
+    ['Customers',[['Name','Mobile','Bills','Total bought','Pending']].concat(S.customers.map(c=>{const b=S.sales.filter(x=>x.customerId===c.id);return [c.name,c.phone,b.length,sum(b,x=>x.total),Math.max(0,custDue(c.id))]}))],
+    ['Suppliers',[['Supplier','City','Phone','Purchased','Paid','You owe']].concat(S.suppliers.map(sp=>{const pu=sum(sp.ledger.filter(e=>e.kind==='purchase'),e=>e.amount),o=owed(sp);return [sp.name,sp.city||'',sp.phone||'',pu,pu-o,o]}))],
+    ['Expenses',[['Date','Category','Note','Amount']].concat(S.expenses.slice().sort((a,b)=>a.date<b.date?1:-1).map(e=>[e.date,e.category,e.note||'',e.amount]))],
+    ['Repairs',[['Job','Date','Customer','Mobile','Phone','Problem','Estimate','Advance','Status','Charged','Parts cost']].concat(S.repairs.map(r=>[r.no,r.date,r.customer,r.phone||'',r.device,r.issue,r.estimate,r.advance,r.status,r.charge||'',r.parts||'']))],
+    ['Warranty',[['Item','IMEI','Customer','Bill','Sold on','Warranty until','Status']].concat(warrRows().map(r=>[r.item.name,r.item.imei||'',custName(r.sale.customerId),r.sale.no,r.sale.date,r.end,{active:'Active',soon:'Ending soon',expired:'Expired'}[r.state]]))]
+  ];
+  download('galla-shop-data-'+t+'.xlsx',buildXlsx(sheets),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+function restore(text){
+  const p=$('#restoreErr');
+  try{const o=JSON.parse(text);if(!o||!Array.isArray(o.sales)||!Array.isArray(o.products))throw 0;o.sample=!!o.sample;S=o;ui.cart=[];ui.lastSale=null;persist('Backup restored')}
+  catch(e){if(p){p.textContent='That does not look like a backup from this app. Copy the whole backup text and try again.';p.hidden=false}}
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  if(e.target===$('#overlay'))return closeForm();
+  const b=e.target.closest('[data-act]');if(b)act(b.dataset.act,b.dataset,b);
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.q!==undefined){ui.q=t.value;$('#list').innerHTML=LISTS[ui.view]()}
+  else if(t.id==='pickQ'){ui.pickQ=t.value;$('#pickList').innerHTML=lPick()}
+  else if(t.dataset.bill){ui.bill[t.dataset.bill]=t.value;$('#totals').innerHTML=totalsHtml()}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.price!==undefined){ui.cart[+t.dataset.price].price=Math.max(0,num(t.value));render()}
+  else if(t.dataset.billsel){ui.bill[t.dataset.billsel]=t.value;$('#totals').innerHTML=totalsHtml()}
+  else if(t.dataset.f){if(t.value){ui[t.dataset.f]=t.value;render()}}
+  else if(t.id==='restoreFile'&&t.files[0]){const r=new FileReader();r.onload=()=>restore(String(r.result));r.readAsText(t.files[0])}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#overlay').hidden)closeForm()});
+save();render();
+</script>
+</body></html>
